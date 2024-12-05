@@ -19,16 +19,9 @@ seed_commands = AppGroup('seed')
 def seed():
     if environment == 'production':
         # Undo all data first in production
-        undo_users()
-        undo_cards()
-        undo_wallets()
-        undo_categories()
-        undo_spendings()
-        undo_reward_points()
-        undo_spending_categories()
-        undo_wallet_cards()
+        undo_all()
 
-    # Seed all data
+    # Seed data in correct dependency order
     seed_users()
     seed_categories()
     seed_cards()
@@ -42,11 +35,19 @@ def seed():
 # Creates the `flask seed undo` command
 @seed_commands.command('undo')
 def undo():
+    undo_all()
+
+
+# Helper functions to ensure proper order for undo/seed
+def undo_all():
+    """
+    Undo all data in reverse order of seeding.
+    """
     undo_wallet_cards()
     undo_spending_categories()
     undo_reward_points()
-    undo_users()
-    undo_cards()
-    undo_wallets()
-    undo_categories()
     undo_spendings()
+    undo_wallets()
+    undo_cards()
+    undo_categories()
+    undo_users()
