@@ -39,12 +39,6 @@ COPY . .
 # Ensure the database migrations run successfully
 RUN flask db upgrade || { echo "Database upgrade failed"; exit 1; }
 
-# Add the debug script to check the database
-COPY debug_flask.py .
-RUN python debug_flask.py || { echo "Debug script failed"; exit 1; }
-
-# Ensure the database seeds run successfully
-RUN flask seed all || { echo "Database seeding failed"; exit 1; }
-
-# Use Gunicorn to serve the application
-CMD ["gunicorn", "app:app"]
+# Run database seeding within the CMD step instead
+# CMD ensures seeding happens during container startup rather than during the build phase
+CMD flask db upgrade && flask seed all && gunicorn app:app
