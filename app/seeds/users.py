@@ -1,9 +1,11 @@
 from app.models import db, User, environment, SCHEMA
 from sqlalchemy.sql import text
 
+
 def seed_users():
     """
     Seeds initial users into the database with first and last names.
+    Prevents duplicates by checking if the email already exists.
     """
     users = [
         User(username='Demo', email='demo@aa.io', password='password', firstname='Demo', lastname='User'),
@@ -13,9 +15,17 @@ def seed_users():
         User(username='charlie', email='charlie@aa.io', password='password', firstname='Charlie', lastname='Williams'),
     ]
 
-    # Use bulk save for efficient insertion
-    db.session.bulk_save_objects(users)
+    for user in users:
+        # Check if a user with the same email already exists
+        existing_user = User.query.filter_by(email=user.email).first()
+        if existing_user:
+            print(f"User with email {user.email} already exists. Skipping...")
+        else:
+            print(f"Adding user: {user.email}")
+            db.session.add(user)
+
     db.session.commit()
+    print("User seeding complete!")
 
 
 def undo_users():
